@@ -137,11 +137,11 @@ export async function syncDecks(
   localDecks: Deck[],
   pendingDeletes: string[],
   userId: string,
-): Promise<{ mergedDecks: Deck[]; error: string | null; pushedCount: number; pulledCount: number; conflictCount: number }> {
+): Promise<{ mergedDecks: Deck[]; error: string | null; pushedCount: number; pulledCount: number; conflictCount: number; exercisesPushed: number; exercisesPulled: number }> {
 
   const { data: deckRows, error: deckError } = await client
     .from('decks').select('*').eq('owner_id', userId).is('deleted_at', null)
-  if (deckError) return { mergedDecks: localDecks, error: deckError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0 }
+  if (deckError) return { mergedDecks: localDecks, error: deckError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
 
   const deckIds = (deckRows as DeckRow[]).map((r) => r.id)
   const emptyFilter = deckIds.length > 0 ? deckIds : ['']
@@ -150,8 +150,8 @@ export async function syncDecks(
     client.from('exercises').select('*').in('deck_id', emptyFilter).is('deleted_at', null),
     client.from('study_settings').select('*').in('deck_id', emptyFilter),
   ])
-  if (exError) return { mergedDecks: localDecks, error: exError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0 }
-  if (settingError) return { mergedDecks: localDecks, error: settingError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0 }
+  if (exError) return { mergedDecks: localDecks, error: exError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
+  if (settingError) return { mergedDecks: localDecks, error: settingError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
 
   const exercisesByDeck = new Map<string, Exercise[]>()
   ;(exerciseRows as ExerciseRow[]).forEach((row) => {
@@ -212,15 +212,15 @@ export async function syncDecks(
 
   if (deckUpserts.length > 0) {
     const { error } = await client.from('decks').upsert(deckUpserts, { onConflict: 'id' })
-    if (error) return { mergedDecks: localDecks, error: error.message, pushedCount: 0, pulledCount: 0, conflictCount: 0 }
+    if (error) return { mergedDecks: localDecks, error: error.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
   }
   if (exUpserts.length > 0) {
     const { error } = await client.from('exercises').upsert(exUpserts, { onConflict: 'id' })
-    if (error) return { mergedDecks: localDecks, error: error.message, pushedCount: 0, pulledCount: 0, conflictCount: 0 }
+    if (error) return { mergedDecks: localDecks, error: error.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
   }
   if (settingUpserts.length > 0) {
     const { error } = await client.from('study_settings').upsert(settingUpserts, { onConflict: 'deck_id' })
-    if (error) return { mergedDecks: localDecks, error: error.message, pushedCount: 0, pulledCount: 0, conflictCount: 0 }
+    if (error) return { mergedDecks: localDecks, error: error.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
   }
 
   if (pendingDeletes.length > 0) {
@@ -231,5 +231,10 @@ export async function syncDecks(
     ])
   }
 
-  return { mergedDecks, error: null, pushedCount, pulledCount, conflictCount }
+  const exercisesPushed = exUpserts.length
+  const exercisesPulled = mergedDecks
+    .filter((d) => !localById.has(d.id))
+    .reduce((sum, d) => sum + d.exercises.length, 0)
+
+  return { mergedDecks, error: null, pushedCount, pulledCount, conflictCount, exercisesPushed, exercisesPulled }
 }

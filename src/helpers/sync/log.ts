@@ -4,6 +4,8 @@ export interface SyncLog {
   decksPushed: number
   decksPulled: number
   decksConflicted: number
+  exercisesPushed: number
+  exercisesPulled: number
   recordsPushed: number
   recordsPulled: number
   /** Web only — 0 on mobile */
@@ -41,10 +43,14 @@ export function buildSyncMessage(log: SyncLog): SyncMessage {
 
   const lines: string[] = []
 
-  if (log.decksPushed > 0)
-    lines.push(`${log.decksPushed} deck${log.decksPushed > 1 ? 's' : ''} uploaded`)
-  if (log.decksPulled > 0)
-    lines.push(`${log.decksPulled} deck${log.decksPulled > 1 ? 's' : ''} downloaded`)
+  if (log.decksPushed > 0) {
+    const ex = log.exercisesPushed > 0 ? ` (${log.exercisesPushed} exercise${log.exercisesPushed > 1 ? 's' : ''})` : ''
+    lines.push(`${log.decksPushed} deck${log.decksPushed > 1 ? 's' : ''} uploaded${ex}`)
+  }
+  if (log.decksPulled > 0) {
+    const ex = log.exercisesPulled > 0 ? ` (${log.exercisesPulled} exercise${log.exercisesPulled > 1 ? 's' : ''})` : ''
+    lines.push(`${log.decksPulled} deck${log.decksPulled > 1 ? 's' : ''} downloaded${ex}`)
+  }
   if (log.recordsPushed > 0)
     lines.push(`${log.recordsPushed} study record${log.recordsPushed > 1 ? 's' : ''} saved`)
   if (log.recordsPulled > 0)
