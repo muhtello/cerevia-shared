@@ -20,6 +20,8 @@ export function getInitialRecord(exerciseId: string): CardRecord {
 /**
  * Returns the subset of exercises that are new or due for review.
  * Capped at `settings.maxCards` (0 = no cap, returns all due).
+ * Result preserves original deck order (no shuffle) — the caller
+ * uses pickFromPool() to introduce randomness during the session.
  */
 export function buildExercisePool(
     exercises: Exercise[],

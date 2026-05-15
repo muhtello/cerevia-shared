@@ -1,9 +1,6 @@
 export type Tier = 'free' | 'pro';
 
-export function getCurrentMonthKey(): string {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-}
+
 
 export const TIER_LIMITS = {
     free: {
