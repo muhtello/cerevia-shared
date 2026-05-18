@@ -153,9 +153,11 @@ export async function syncDecks(
   // Supabase rejects .in() with an empty array (400 error); [''] safely matches nothing.
   const emptyFilter = deckIds.length > 0 ? deckIds : ['']
 
+  // limit(10000) overrides PostgREST's default max-rows cap (typically 1000) so large
+  // exercise sets aren't silently truncated. Adjust if your dataset grows beyond this.
   const [{ data: exerciseRows, error: exError }, { data: settingRows, error: settingError }] = await Promise.all([
-    client.from('exercises').select('*').in('deck_id', emptyFilter).is('deleted_at', null),
-    client.from('study_settings').select('*').in('deck_id', emptyFilter),
+    client.from('exercises').select('*').in('deck_id', emptyFilter).is('deleted_at', null).limit(10000),
+    client.from('study_settings').select('*').in('deck_id', emptyFilter).limit(10000),
   ])
   if (exError) return { mergedDecks: localDecks, error: exError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
   if (settingError) return { mergedDecks: localDecks, error: settingError.message, pushedCount: 0, pulledCount: 0, conflictCount: 0, exercisesPushed: 0, exercisesPulled: 0 }
@@ -195,11 +197,12 @@ export async function syncDecks(
       const localIsNewer = local._localStatus !== 'synced' && localTime >= serverTime
       if (localIsNewer) {
         deckUpserts.push({ id: local.id, owner_id: userId, title: local.title, content: local.content ?? null, created_at: toISO(local.createdAt), updated_at: toISO(local.updatedAt ?? local.createdAt), deleted_at: null })
-        exUpserts.push(...local.exercises.map((e) => toExerciseRow(local.id, e)))
-        // Guard: old persisted decks may lack studySettings (added later in schema)
+        // Guard: old persisted decks may lack exercises/studySettings (fields added later in schema)
+        const exercises = local.exercises ?? []
+        exUpserts.push(...exercises.map((e) => toExerciseRow(local.id, e)))
         const settings = local.studySettings ?? { ...DEFAULT_STUDY_SETTINGS }
         settingUpserts.push(toStudySettingsRow(local.id, settings))
-        mergedDecks.push({ ...local, studySettings: settings, _localStatus: 'synced' })
+        mergedDecks.push({ ...local, exercises, studySettings: settings, _localStatus: 'synced' })
         pushedCount++
       } else {
         // Server wins — local had no unsaved changes or server is strictly newer (conflict)
@@ -210,11 +213,12 @@ export async function syncDecks(
       // No server record yet — push if deck was ever created/modified locally
       if (local._localStatus !== 'synced') {
         deckUpserts.push({ id: local.id, owner_id: userId, title: local.title, content: local.content ?? null, created_at: toISO(local.createdAt), updated_at: toISO(local.updatedAt ?? local.createdAt), deleted_at: null })
-        exUpserts.push(...local.exercises.map((e) => toExerciseRow(local.id, e)))
-        // Guard: old persisted decks may lack studySettings (added later in schema)
+        // Guard: old persisted decks may lack exercises/studySettings (fields added later in schema)
+        const exercises = local.exercises ?? []
+        exUpserts.push(...exercises.map((e) => toExerciseRow(local.id, e)))
         const settings = local.studySettings ?? { ...DEFAULT_STUDY_SETTINGS }
         settingUpserts.push(toStudySettingsRow(local.id, settings))
-        mergedDecks.push({ ...local, studySettings: settings, _localStatus: 'synced' })
+        mergedDecks.push({ ...local, exercises, studySettings: settings, _localStatus: 'synced' })
         pushedCount++
       }
       // _localStatus === 'synced' with no server record means the deck was deleted remotely — drop it.

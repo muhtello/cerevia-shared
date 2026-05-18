@@ -43,6 +43,9 @@ export async function syncStudyData(
   client: SupabaseClient,
   localCardRecords: Record<string, Record<string, CardRecord>>,
   userId: string,
+  // Exercise IDs whose server records were deleted by a progress reset this sync cycle.
+  // Prevents re-pulling reset records when the server DELETE partially failed.
+  pendingResetExerciseIds: string[] = [],
 ): Promise<{ mergedFlatRecords: Record<string, CardRecord>; error: string | null; pushedCount: number; pulledCount: number }> {
 
   // Flatten nested deckId → exerciseId structure into a single exerciseId map
@@ -55,8 +58,9 @@ export async function syncStudyData(
 
   // ── 1. Fetch server state ──────────────────────────────────────────────────
 
+  // limit(10000) overrides PostgREST's default max-rows cap so large record sets aren't truncated.
   const { data: serverRows, error: pullError } = await client
-    .from('card_records').select('*').eq('user_id', userId)
+    .from('card_records').select('*').eq('user_id', userId).limit(10000)
   if (pullError) return { mergedFlatRecords: localFlat, error: pullError.message, pushedCount: 0, pulledCount: 0 }
 
   const serverMap = new Map<string, CardRecordRow>(
@@ -88,9 +92,15 @@ export async function syncStudyData(
   }
 
   // ── 3. Pull server-only records (studied on another device) ────────────────
+  // NOTE: syncRecordResets runs before syncStudyData in runSync.ts (Step 2 → Step 3).
+  // If a reset's server DELETE failed, the record would still be in serverMap. We must
+  // not re-pull it, otherwise the user's progress reset would be silently undone.
+  // The caller passes pendingResetExerciseIds for exactly this guard.
+
+  const resetIds = new Set(pendingResetExerciseIds)
 
   for (const [exerciseId, serverRow] of serverMap) {
-    if (!mergedFlatRecords[exerciseId]) {
+    if (!mergedFlatRecords[exerciseId] && !resetIds.has(exerciseId)) {
       mergedFlatRecords[exerciseId] = fromCardRecordRow(serverRow)
       pulledCount++
     }
