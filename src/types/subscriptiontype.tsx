@@ -1,0 +1,22 @@
+import { Tier } from './tierType';
+
+export type SubscriptionStatus =                                                                                                                      
+    | 'none'                                                                                                                                            
+    | 'active'                                                                                                                                          
+    | 'trialing'                                                                                                                                        
+    | 'past_due'                                                                                                                                        
+    | 'canceled'                                                                                                                                        
+    | 'inactive';
+
+export interface UserTierRow {
+    user_id: string;
+    tier: Tier;
+    subscription_status: SubscriptionStatus;
+    stripe_customer_id?: string | null;
+    stripe_subscription_id?: string | null;
+    revenuecat_app_user_id?: string | null;
+    updated_at?: string | null;
+}
+
+/** RevenueCat entitlement ID — must match what's configured in the RC dashboard */  
+export const RC_ENTITLEMENT_ID = 'pro';   
