@@ -63,7 +63,7 @@ function fromExerciseRow(row: ExerciseRow): Exercise {
   if (row.type === 'order-sentence') {
     return {
       ...base, type: 'order-sentence',
-      answer: (props.answer as string) ?? '',
+      words: (props.words as string[]) ?? [],
       explanation: (props.explanation as string) ?? undefined,
     } as any
   }
@@ -86,7 +86,7 @@ function toExerciseRow(deckId: string, exercise: Exercise) {
   } else if (exercise.type === 'word-pick') {
     properties = { blanks: exercise.blanks, options: exercise.options, explanation: exercise.explanation ?? null }
   } else if (exercise.type === 'order-sentence') {
-    properties = { answer: exercise.answer, explanation: exercise.explanation ?? null }
+    properties = { words: exercise.words, explanation: exercise.explanation ?? null }
   } else if (exercise.type === 'mcq') {
     properties = { options: exercise.options, answers: exercise.answers, explanation: exercise.explanation ?? null }
   }

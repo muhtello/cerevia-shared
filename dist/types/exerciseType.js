@@ -36,6 +36,13 @@ function getDraftFields(type) {
                 { field: 'option', label: 'Add Option' },
                 { field: 'answer', label: 'Correct Answer' },
             ];
+        case 'order-sentence':
+            return [
+                { field: 'source', label: 'Source Text' },
+                { field: 'question', label: 'Question' },
+                { field: 'sentence', label: 'Sentence to Order' },
+                { field: 'answer', label: 'Correct Answer' },
+            ];
     }
 }
 // ─── Exercise metadata (label/description — no icons) ────────────────────────
@@ -44,4 +51,5 @@ exports.EXERCISE_META = {
     'fill-in-the-blank': { label: 'Fill Blank', description: 'Type the missing word(s)' },
     'word-pick': { label: 'Word Pick', description: 'Select the missing word(s)' },
     mcq: { label: 'MCQ', description: 'Multiple choice question' },
+    'order-sentence': { label: 'Order Sentence', description: 'Arrange shuffled words into the correct order' },
 };

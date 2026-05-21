@@ -4,7 +4,7 @@ exports.syncDecks = syncDecks;
 const settingType_1 = require("../../types/settingType");
 // ─── Converters ───────────────────────────────────────────────────────────────
 function fromExerciseRow(row) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
     const props = (_a = row.properties) !== null && _a !== void 0 ? _a : {};
     const base = {
         id: row.id, type: row.type, question: row.question,
@@ -33,10 +33,13 @@ function fromExerciseRow(row) {
         }
         return Object.assign(Object.assign({}, base), { type: 'word-pick', blanks, options, explanation: (_k = props.explanation) !== null && _k !== void 0 ? _k : undefined });
     }
-    return Object.assign(Object.assign({}, base), { type: 'mcq', options: (_l = props.options) !== null && _l !== void 0 ? _l : [], answers: (_m = props.answers) !== null && _m !== void 0 ? _m : [], explanation: (_o = props.explanation) !== null && _o !== void 0 ? _o : undefined });
+    if (row.type === 'order-sentence') {
+        return Object.assign(Object.assign({}, base), { type: 'order-sentence', answer: (_l = props.answer) !== null && _l !== void 0 ? _l : '', explanation: (_m = props.explanation) !== null && _m !== void 0 ? _m : undefined });
+    }
+    return Object.assign(Object.assign({}, base), { type: 'mcq', options: (_o = props.options) !== null && _o !== void 0 ? _o : [], answers: (_p = props.answers) !== null && _p !== void 0 ? _p : [], explanation: (_q = props.explanation) !== null && _q !== void 0 ? _q : undefined });
 }
 function toExerciseRow(deckId, exercise) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     let properties = {};
     if (exercise.type === 'flashcard') {
         properties = { answer: exercise.answer };
@@ -49,13 +52,16 @@ function toExerciseRow(deckId, exercise) {
     else if (exercise.type === 'word-pick') {
         properties = { blanks: exercise.blanks, options: exercise.options, explanation: (_c = exercise.explanation) !== null && _c !== void 0 ? _c : null };
     }
+    else if (exercise.type === 'order-sentence') {
+        properties = { answer: exercise.answer, explanation: (_d = exercise.explanation) !== null && _d !== void 0 ? _d : null };
+    }
     else if (exercise.type === 'mcq') {
-        properties = { options: exercise.options, answers: exercise.answers, explanation: (_d = exercise.explanation) !== null && _d !== void 0 ? _d : null };
+        properties = { options: exercise.options, answers: exercise.answers, explanation: (_e = exercise.explanation) !== null && _e !== void 0 ? _e : null };
     }
     return {
         id: exercise.id, deck_id: deckId, type: exercise.type, question: exercise.question,
-        properties, source_text: (_e = exercise.sourceText) !== null && _e !== void 0 ? _e : null, source_range: (_f = exercise.sourceRange) !== null && _f !== void 0 ? _f : null,
-        highlight_color: (_g = exercise.highlightColor) !== null && _g !== void 0 ? _g : null,
+        properties, source_text: (_f = exercise.sourceText) !== null && _f !== void 0 ? _f : null, source_range: (_g = exercise.sourceRange) !== null && _g !== void 0 ? _g : null,
+        highlight_color: (_h = exercise.highlightColor) !== null && _h !== void 0 ? _h : null,
         created_at: new Date(exercise.createdAt).toISOString(), updated_at: new Date().toISOString(), deleted_at: null,
     };
 }
