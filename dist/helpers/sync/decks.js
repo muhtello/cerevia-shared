@@ -34,7 +34,7 @@ function fromExerciseRow(row) {
         return Object.assign(Object.assign({}, base), { type: 'word-pick', blanks, options, explanation: (_k = props.explanation) !== null && _k !== void 0 ? _k : undefined });
     }
     if (row.type === 'order-sentence') {
-        return Object.assign(Object.assign({}, base), { type: 'order-sentence', answer: (_l = props.answer) !== null && _l !== void 0 ? _l : '', explanation: (_m = props.explanation) !== null && _m !== void 0 ? _m : undefined });
+        return Object.assign(Object.assign({}, base), { type: 'order-sentence', words: (_l = props.words) !== null && _l !== void 0 ? _l : [], explanation: (_m = props.explanation) !== null && _m !== void 0 ? _m : undefined });
     }
     return Object.assign(Object.assign({}, base), { type: 'mcq', options: (_o = props.options) !== null && _o !== void 0 ? _o : [], answers: (_p = props.answers) !== null && _p !== void 0 ? _p : [], explanation: (_q = props.explanation) !== null && _q !== void 0 ? _q : undefined });
 }
@@ -53,7 +53,7 @@ function toExerciseRow(deckId, exercise) {
         properties = { blanks: exercise.blanks, options: exercise.options, explanation: (_c = exercise.explanation) !== null && _c !== void 0 ? _c : null };
     }
     else if (exercise.type === 'order-sentence') {
-        properties = { answer: exercise.answer, explanation: (_d = exercise.explanation) !== null && _d !== void 0 ? _d : null };
+        properties = { words: exercise.words, explanation: (_d = exercise.explanation) !== null && _d !== void 0 ? _d : null };
     }
     else if (exercise.type === 'mcq') {
         properties = { options: exercise.options, answers: exercise.answers, explanation: (_e = exercise.explanation) !== null && _e !== void 0 ? _e : null };
@@ -71,8 +71,10 @@ function fromStudySettingsRow(row) {
         repeatSettings: { mode: row.repeat_mode, count: (_a = row.repeat_count) !== null && _a !== void 0 ? _a : undefined },
         hardDelayHours: row.hard_delay_hours, goodDays: row.good_days, easyDays: row.easy_days,
         intervalDayIncrement: row.interval_day_increment, maxCards: row.max_cards,
-        // TODO: maxHardRepeats not in DB schema — always falls back to default until column is added
+        // TODO: maxHardRepeats, timerEnabled, timerSeconds not in DB schema — fall back to defaults
         maxHardRepeats: settingType_1.DEFAULT_STUDY_SETTINGS.maxHardRepeats,
+        timerEnabled: settingType_1.DEFAULT_STUDY_SETTINGS.timerEnabled,
+        timerSeconds: settingType_1.DEFAULT_STUDY_SETTINGS.timerSeconds,
     };
 }
 function toStudySettingsRow(deckId, settings) {

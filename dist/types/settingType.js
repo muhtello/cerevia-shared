@@ -11,4 +11,6 @@ exports.DEFAULT_STUDY_SETTINGS = {
     intervalDayIncrement: 2,
     maxCards: 20,
     maxHardRepeats: 2,
+    timerEnabled: false,
+    timerSeconds: 30,
 };

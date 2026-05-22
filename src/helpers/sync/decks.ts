@@ -103,8 +103,10 @@ function fromStudySettingsRow(row: StudySettingsRow): StudySettings {
     repeatSettings: { mode: row.repeat_mode as RepeatMode, count: row.repeat_count ?? undefined },
     hardDelayHours: row.hard_delay_hours, goodDays: row.good_days, easyDays: row.easy_days,
     intervalDayIncrement: row.interval_day_increment, maxCards: row.max_cards,
-    // TODO: maxHardRepeats not in DB schema — always falls back to default until column is added
+    // TODO: maxHardRepeats, timerEnabled, timerSeconds not in DB schema — fall back to defaults
     maxHardRepeats: DEFAULT_STUDY_SETTINGS.maxHardRepeats,
+    timerEnabled: DEFAULT_STUDY_SETTINGS.timerEnabled,
+    timerSeconds: DEFAULT_STUDY_SETTINGS.timerSeconds,
   }
 }
 

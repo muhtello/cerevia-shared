@@ -48,5 +48,9 @@ export interface StudySettings {
      * the same session before being deferred to hardDelayHours.
      */
     maxHardRepeats: number;
+    /** When true, each card has a countdown timer; answer reveals on expiry. */
+    timerEnabled: boolean;
+    /** Seconds per card when timerEnabled is true. Range: 5–300. */
+    timerSeconds: number;
 }
 export declare const DEFAULT_STUDY_SETTINGS: StudySettings;
