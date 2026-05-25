@@ -20,6 +20,8 @@ __exportStar(require("./types/settingType"), exports);
 __exportStar(require("./types/studyType"), exports);
 __exportStar(require("./types/deckType"), exports);
 __exportStar(require("./types/tierType"), exports);
+__exportStar(require("./types/statsType"), exports);
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 __exportStar(require("./helpers/study.helper"), exports);
 __exportStar(require("./helpers/sync.helper"), exports);
+__exportStar(require("./helpers/stats.helper"), exports);

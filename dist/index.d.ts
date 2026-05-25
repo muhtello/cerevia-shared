@@ -3,5 +3,7 @@ export * from "./types/settingType";
 export * from "./types/studyType";
 export * from "./types/deckType";
 export * from "./types/tierType";
+export * from "./types/statsType";
 export * from "./helpers/study.helper";
 export * from "./helpers/sync.helper";
+export * from "./helpers/stats.helper";
