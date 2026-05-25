@@ -7,3 +7,4 @@ export * from "./types/statsType";
 export * from "./helpers/study.helper";
 export * from "./helpers/sync.helper";
 export * from "./helpers/stats.helper";
+export * from "./helpers/exerciseHelp";
