@@ -26,3 +26,4 @@ __exportStar(require("./helpers/study.helper"), exports);
 __exportStar(require("./helpers/sync.helper"), exports);
 __exportStar(require("./helpers/stats.helper"), exports);
 __exportStar(require("./helpers/exerciseHelp"), exports);
+__exportStar(require("./helpers/deleteAccount"), exports);
