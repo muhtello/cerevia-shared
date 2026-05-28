@@ -17,5 +17,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Re-exports for backwards compatibility — import from '@cerevia/shared' or the sub-files directly.
 __exportStar(require("./sync/decks"), exports);
 __exportStar(require("./sync/study"), exports);
+__exportStar(require("./sync/sessionHistory"), exports);
 __exportStar(require("./sync/profile"), exports);
 __exportStar(require("./sync/log"), exports);

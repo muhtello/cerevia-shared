@@ -1,0 +1,54 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.syncSessionHistory = syncSessionHistory;
+function rowToSessionLog(row) {
+    var _a;
+    return {
+        id: row.id,
+        deckId: (_a = row.deck_id) !== null && _a !== void 0 ? _a : '',
+        stats: row.stats,
+        attempts: row.attempts,
+        savedAt: new Date(row.saved_at).getTime(),
+    };
+}
+// ─── syncSessionHistory ───────────────────────────────────────────────────────
+//
+// Bidirectional sync for the `session_logs` table (authenticated users only).
+//
+// Steps:
+//   1. Pull  — fetch all session_logs for userId (newest 100, ordered desc)
+//   2. Push  — insert local sessions whose id is not yet on the server
+//
+// Returns `pulledSessions` (full server history) so the caller can merge it
+// into their local `sessionHistory` store (deduplication by id).
+// Calling this multiple times is safe — already-pushed ids are skipped.
+async function syncSessionHistory(client, localSessions, userId) {
+    // ── 1. Pull ──────────────────────────────────────────────────────────────────
+    const { data: serverRows, error: pullError } = await client
+        .from('session_logs')
+        .select('id,deck_id,stats,attempts,saved_at')
+        .eq('user_id', userId)
+        .order('saved_at', { ascending: false })
+        .limit(100);
+    if (pullError) {
+        return { pulledSessions: [], syncedIds: [], error: pullError.message };
+    }
+    const serverIds = new Set((serverRows !== null && serverRows !== void 0 ? serverRows : []).map((r) => r.id));
+    // ── 2. Push sessions the server hasn't seen yet ───────────────────────────────
+    const syncedIds = [];
+    for (const session of localSessions.filter(s => !serverIds.has(s.id))) {
+        const { error } = await client.from('session_logs').insert({
+            id: session.id,
+            user_id: userId,
+            guest_session_id: null,
+            deck_id: session.deckId || null,
+            stats: session.stats,
+            attempts: session.attempts,
+            saved_at: new Date(session.savedAt).toISOString(),
+        });
+        if (!error)
+            syncedIds.push(session.id);
+    }
+    const pulledSessions = serverRows.map(rowToSessionLog);
+    return { pulledSessions, syncedIds, error: null };
+}
