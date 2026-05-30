@@ -1,4 +1,4 @@
-﻿// Re-exports for backwards compatibility — import from '@cerevia/shared' or the sub-files directly.
+﻿// Re-exports for backwards compatibility — import from '@mnemova/shared' or the sub-files directly.
 export * from './sync/decks'
 export * from './sync/study'
 export * from './sync/sessionHistory'

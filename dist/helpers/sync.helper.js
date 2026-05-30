@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// Re-exports for backwards compatibility — import from '@cerevia/shared' or the sub-files directly.
+// Re-exports for backwards compatibility — import from '@mnemova/shared' or the sub-files directly.
 __exportStar(require("./sync/decks"), exports);
 __exportStar(require("./sync/study"), exports);
 __exportStar(require("./sync/sessionHistory"), exports);
